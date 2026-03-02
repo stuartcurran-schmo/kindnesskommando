@@ -231,6 +231,10 @@ document.addEventListener('keydown',e=>{
   keys[e.code]=true;
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
   if((e.code==='KeyX'||e.code==='ShiftLeft'||e.code==='ShiftRight')&&game.state==='playing')fireRainbomb();
+  // ── DEV BACKDOOR: backtick + 1/2/3 jumps to level ──
+  if(keys.Backquote&&e.code==='Digit1')jumpToLevel(1);
+  if(keys.Backquote&&e.code==='Digit2')jumpToLevel(2);
+  if(keys.Backquote&&e.code==='Digit3')jumpToLevel(3);
 });
 document.addEventListener('keyup',e=>keys[e.code]=false);
 const isLeft =()=>keys.ArrowLeft ||keys.KeyA;
@@ -1122,6 +1126,22 @@ function showOverlay(type){
       <button class="start-btn" id="startBtn">PLAY AGAIN</button>`;
     document.getElementById('startBtn').addEventListener('click',startGame);
   }
+}
+
+function jumpToLevel(n){
+  document.getElementById('overlay').style.display='none';
+  Object.assign(game,{state:'playing',wellness:100,score:0,rainbombs:3,
+    scrollY:0,frame:0,invincible:0,combo:0,comboTimer:0,
+    levelComplete:false,bossSpawned:false,boss:null,
+    scrollSpeed:50+(n-1)*8, level:n, levelLength:2000});
+  totalScrolled=0; enemySpawnTimer=1.5; obstacleSpawnTimer=2.5; rainbowSpawnTimer=5;
+  Object.assign(casey,{x:W/2-12,y:H-100,facingLeft:false,surgeTimer:0,frame:0,fireTimer:0});
+  [hearts,enemies,obstacles,particles,rainbows,projectiles,floatingTexts].forEach(a=>a.length=0);
+  bgSparkles.forEach(s=>{s.y=Math.random()*H;});
+  if(!audioCtx)initAudio();
+  audioCtx.resume(); musicStarted=false; nextNoteTime=audioCtx.currentTime;
+  startMusic();
+  floatText(W/2-60,H/2-10,`DEV: LEVEL ${n}`,'#ffdd44');
 }
 
 function nextLevel(){
